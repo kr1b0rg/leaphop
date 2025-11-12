@@ -1,0 +1,9 @@
+Privacy Policy for SimpleRunnerFinal
+
+Last updated: November 12, 2025
+
+This application, SimpleRunnerFinal, does not collect, store, or transmit any personal data from users. It does not use analytics, advertising, or third-party services. All game data (scores, coins, settings) is stored locally on the device and is not shared with any server or external entity.
+
+No permissions requiring personal information (camera, microphone, location, contacts) are requested or used.
+
+By using this app, you agree that no personal data is processed. If you have any questions, please contact the developer at: simplerunner@gmail.com

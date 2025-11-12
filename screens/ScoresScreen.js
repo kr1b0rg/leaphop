@@ -1,20 +1,8 @@
 /**
  * ЭКРАН РЕКОРДОВ
- * 
- * Задачи реализованы:
- * ✅ Управление ресурсами приложения (данные)
- * ✅ Применение дизайна и стилей
- * ✅ Добавление функциональных возможностей
  */
-
 import React, { useContext } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  ScrollView,
-  TouchableOpacity 
-} from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import AppContext from '../AppContext';
 
 export default function ScoresScreen({ navigation }) {
@@ -22,6 +10,11 @@ export default function ScoresScreen({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Image 
+        source={require('../assets/textures/ground.png')} 
+        style={styles.background}
+        resizeMode="repeat"
+      />
       <Text style={styles.title}>🏆 Рекорды</Text>
       
       <View style={styles.statsCard}>
@@ -84,31 +77,33 @@ export default function ScoresScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ECF0F1',
-    padding: 20,
-    // Для ландшафтного режима можно добавить
-    flexDirection: 'row', // или изменить расположение элементов
-  },
-  container: {
     flexGrow: 1,
-    backgroundColor: '#ECF0F1',
+    backgroundColor: 'transparent',
     padding: 20,
+    zIndex: 1,
+  },
+  background: {
+    ...StyleSheet.absoluteFillObject,
+    resizeMode: 'repeat',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF',
     textAlign: 'center',
     marginVertical: 30,
+    textShadowColor: 'black',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+    fontFamily: 'monospace',
   },
   statsCard: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 20,
-    borderRadius: 15,
+    borderRadius: 8,
     marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#4A90E2',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -118,9 +113,10 @@ const styles = StyleSheet.create({
   statsTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF',
     marginBottom: 15,
     textAlign: 'center',
+    fontFamily: 'monospace',
   },
   statRow: {
     flexDirection: 'row',
@@ -128,22 +124,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#ECF0F1',
+    borderBottomColor: 'rgba(255,255,255,0.2)',
   },
   statLabel: {
     fontSize: 16,
-    color: '#7F8C8D',
+    color: '#CCCCCC',
+    fontFamily: 'monospace',
   },
   statValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF',
+    fontFamily: 'monospace',
   },
   achievementsCard: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 20,
-    borderRadius: 15,
+    borderRadius: 8,
     marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#4A90E2',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -153,20 +153,22 @@ const styles = StyleSheet.create({
   achievementsTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF',
     marginBottom: 15,
     textAlign: 'center',
+    fontFamily: 'monospace',
   },
   achievement: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#ECF0F1',
+    borderBottomColor: 'rgba(255,255,255,0.2)',
   },
   achievementIcon: {
     fontSize: 24,
     marginRight: 15,
+    color: '#FFFFFF',
   },
   achievementInfo: {
     flex: 1,
@@ -174,17 +176,19 @@ const styles = StyleSheet.create({
   achievementName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF',
     marginBottom: 4,
+    fontFamily: 'monospace',
   },
   achievementDesc: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: '#CCCCCC',
     marginBottom: 8,
+    fontFamily: 'monospace',
   },
   progressBar: {
     height: 6,
-    backgroundColor: '#ECF0F1',
+    backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -194,15 +198,18 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   backButton: {
-    backgroundColor: '#3498DB',
+    backgroundColor: 'rgba(100, 100, 100, 0.7)',
     padding: 18,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
+    borderWidth: 2,
+    borderColor: '#4A90E2',
   },
   backButtonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: 'monospace',
   },
 });

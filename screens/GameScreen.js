@@ -1,5 +1,5 @@
 /**
- * ИСПРАВЛЕННЫЙ ГОРИЗОНТАЛЬНЫЙ ПЛАТФОРМЕР С РАБОЧЕЙ ВИБРАЦИЕЙ
+ * ИСПРАВЛЕННЫЙ ГОРИЗОНТАЛЬНЫЙ ПЛАТФОРМЕР С РАБОЧЕЙ ВИБРАЦИЕЙ И ПИКСЕЛЬНЫМ СТИЛЕМ
  */
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { 
@@ -72,17 +72,14 @@ export default function GameScreen({ navigation }) {
     if (!gameSettings.vibrationEnabled) return;
     
     try {
-      // Для веб-платформы вибрация не поддерживается
       if (Platform.OS === 'web') {
         console.log('Vibration not supported on web');
         return;
       }
       
       if (Platform.OS === 'ios') {
-        // iOS использует другой формат вибрации
         Vibration.vibrate(100);
       } else {
-        // Android поддерживает паттерны
         Vibration.vibrate(pattern);
       }
     } catch (error) {
@@ -217,16 +214,13 @@ export default function GameScreen({ navigation }) {
    * ФИЗИКА - полностью переписанная с использованием useRef
    */
   const updatePhysics = () => {
-    // Получаем текущие значения из ссылок
     let newX = playerXRef.current + playerVelocityRef.current.x;
     let newY = playerYRef.current + playerVelocityRef.current.y;
 
-    // Применяем гравитацию если не на земле
     if (!isGroundedRef.current) {
       playerVelocityRef.current.y += GRAVITY;
     }
 
-    // Проверка столкновений с платформами
     let grounded = false;
     
     for (const platform of platforms) {
@@ -234,47 +228,35 @@ export default function GameScreen({ navigation }) {
         { x: newX, y: newY, width: 40, height: 40 },
         platform
       )) {
-        // Столкновение сверху с платформой (игрок падает на платформу)
         if (playerYRef.current <= platform.y - 40 && playerVelocityRef.current.y >= 0) {
           newY = platform.y - 40;
           playerVelocityRef.current.y = 0;
           grounded = true;
           break;
-        }
-        // Столкновение снизу (игрок ударяется головой)
-        else if (playerYRef.current >= platform.y + platform.height && playerVelocityRef.current.y <= 0) {
+        } else if (playerYRef.current >= platform.y + platform.height && playerVelocityRef.current.y <= 0) {
           newY = platform.y + platform.height;
           playerVelocityRef.current.y = 0;
-        }
-        // Столкновение с боками
-        else if (playerVelocityRef.current.x !== 0) {
-          // Слева
+        } else if (playerVelocityRef.current.x !== 0) {
           if (playerXRef.current <= platform.x - 40 && newX >= platform.x - 40) {
             newX = platform.x - 40;
-          }
-          // Справа
-          else if (playerXRef.current >= platform.x + platform.width && newX <= platform.x + platform.width) {
+          } else if (playerXRef.current >= platform.x + platform.width && newX <= platform.x + platform.width) {
             newX = platform.x + platform.width;
           }
         }
       }
     }
 
-    // Обновляем ссылки
     playerXRef.current = newX;
     playerYRef.current = newY;
     isGroundedRef.current = grounded;
 
-    // Границы уровня
     playerXRef.current = Math.max(0, Math.min(playerXRef.current, LEVEL_WIDTH - 40));
     
-    // Проверка выхода за нижнюю границу
     if (playerYRef.current > screenHeight + 100) {
       gameOver();
-      return; // Важно: прекращаем выполнение после gameOver
+      return;
     }
 
-    // Обновляем состояние для отображения
     setPlayerPosition({ x: playerXRef.current, y: playerYRef.current });
   };
 
@@ -289,12 +271,10 @@ export default function GameScreen({ navigation }) {
         
         let newX = enemy.x + enemy.speed * enemy.direction;
         
-        // Проверка границ платформы
         if (newX < platform.x || newX + enemy.width > platform.x + platform.width) {
           return { ...enemy, direction: -enemy.direction };
         }
         
-        // Позиция Y всегда на платформе
         const newY = platform.y - enemy.height;
         
         return { ...enemy, x: newX, y: newY };
@@ -326,7 +306,6 @@ export default function GameScreen({ navigation }) {
   };
 
   const checkEnemyCollisions = () => {
-    // Создаем копию массива врагов для безопасной итерации
     const currentEnemies = [...enemies];
     
     currentEnemies.forEach(enemy => {
@@ -334,15 +313,12 @@ export default function GameScreen({ navigation }) {
         { x: playerXRef.current, y: playerYRef.current, width: 40, height: 40 },
         enemy
       )) {
-        // Проверка, прыгнул ли игрок на врага
         if (playerVelocityRef.current.y > 0 && playerYRef.current + 20 <= enemy.y) {
-          // Уничтожение врага
           setEnemies(prev => prev.filter(e => e.id !== enemy.id));
           playerVelocityRef.current.y = JUMP_STRENGTH * 0.7;
           addScore(200);
           safeVibrate(vibrationPatterns.enemyDefeated);
         } else {
-          // Игрок получает урон
           gameOver();
         }
       }
@@ -379,7 +355,6 @@ export default function GameScreen({ navigation }) {
     scoreRef.current += points;
     setScore(scoreRef.current);
     
-    // Откладываем сохранение настроек до завершения рендеринга
     if (saveSettingsTimeoutRef.current) {
       clearTimeout(saveSettingsTimeoutRef.current);
     }
@@ -400,31 +375,24 @@ export default function GameScreen({ navigation }) {
    * ЗАВЕРШЕНИЕ ИГРЫ С ЗАЩИТОЙ ОТ МНОГОКРАТНОГО ВЫЗОВА
    */
   const gameOver = () => {
-    // Защита от многократного вызова
     if (gameStateRef.current === 'game-over') return;
     
     gameStateRef.current = 'game-over';
     
-    // Очищаем таймер сохранения настроек
     if (saveSettingsTimeoutRef.current) {
       clearTimeout(saveSettingsTimeoutRef.current);
     }
     
-    // Останавливаем игровой цикл
     if (gameLoopInterval.current) {
       clearInterval(gameLoopInterval.current);
       gameLoopInterval.current = null;
     }
     
-    // Вибрация при завершении игры
     safeVibrate(vibrationPatterns.gameOver);
     
-    // Обновляем состояние для отображения экрана завершения игры
     setGameState('game-over');
     
-    // Сохраняем рекорд если нужно
     if (scoreRef.current > gameSettings.bestScore) {
-      // Используем setTimeout для безопасного обновления после рендеринга
       setTimeout(() => {
         saveSettings({ ...gameSettings, bestScore: scoreRef.current });
       }, 0);
@@ -432,7 +400,7 @@ export default function GameScreen({ navigation }) {
   };
 
   /**
-   * УПРАВЛЕНИЕ - полностью переписанное с использованием useRef
+   * УПРАВЛЕНИЕ
    */
   const moveLeft = () => {
     if (gameStateRef.current === 'playing') {
@@ -453,7 +421,15 @@ export default function GameScreen({ navigation }) {
     keysPressedRef.current.right = false;
   };
 
-  const jump = () => {
+  const jumpLeft = () => {
+    if (gameStateRef.current === 'playing' && isGroundedRef.current) {
+      playerVelocityRef.current.y = JUMP_STRENGTH;
+      isGroundedRef.current = false;
+      safeVibrate(vibrationPatterns.buttonPress);
+    }
+  };
+
+  const jumpRight = () => {
     if (gameStateRef.current === 'playing' && isGroundedRef.current) {
       playerVelocityRef.current.y = JUMP_STRENGTH;
       isGroundedRef.current = false;
@@ -462,10 +438,9 @@ export default function GameScreen({ navigation }) {
   };
 
   /**
-   * ПЕРЕЗАПУСК ИГРЫ С ПОЛНЫМ СБРОСОМ
+   * ПЕРЕЗАПУСК ИГРЫ
    */
   const restartGame = () => {
-    // Очищаем все таймеры
     if (gameLoopInterval.current) {
       clearInterval(gameLoopInterval.current);
       gameLoopInterval.current = null;
@@ -476,7 +451,6 @@ export default function GameScreen({ navigation }) {
       saveSettingsTimeoutRef.current = null;
     }
     
-    // Сбрасываем все ссылки
     gameStateRef.current = 'playing';
     const initialPosition = { x: 100, y: screenHeight - 140 };
     playerXRef.current = initialPosition.x;
@@ -488,7 +462,6 @@ export default function GameScreen({ navigation }) {
     coinsRef.current = 0;
     gameTimeRef.current = 0;
     
-    // Сбрасываем состояние
     setGameState('playing');
     setPlayerPosition(initialPosition);
     setScore(0);
@@ -496,7 +469,6 @@ export default function GameScreen({ navigation }) {
     setGameTime(0);
     setCameraOffset(0);
     
-    // Переинициализируем игру
     initializeGame();
     startGameLoop();
   };
@@ -522,19 +494,34 @@ export default function GameScreen({ navigation }) {
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      {/* ФОН */}
+      {/* ФОН — небо с облаками */}
       <Image 
-        source={require('../assets/images/bg.png')} 
-        style={[styles.background, { width: LEVEL_WIDTH }]} 
+        source={require('../assets/textures/sky.png')} 
+        style={styles.background}
+        resizeMode="repeat"
       />
+
+      {/* ЛОГО ИГРЫ — в верхней части, коричневый текст */}
+      <Text style={styles.gameLogo}>Simple Runner</Text>
       
-      {/* ПЛАТФОРМЫ */}
+      {/* HUD — прозрачный, коричневый текст, в одну строку */}
+      <View style={styles.hud}>
+        <Text style={styles.hudText}>Счет: {score}</Text>
+        <Text style={styles.hudText}>|</Text>
+        <Text style={styles.hudText}>Монеты: {coins}</Text>
+        <Text style={styles.hudText}>|</Text>
+        <Text style={styles.hudText}>Время: {formatTime(gameTime)}</Text>
+        <Text style={styles.hudText}>|</Text>
+        <Text style={styles.hudText}>Рекорд: {gameSettings.bestScore}</Text>
+      </View>
+      
+      {/* ПЛАТФОРМЫ — теперь с текстурой земли и травой, НЕ растянутой */}
       {platforms.map(platform => (
-        <View
+        <Image
           key={platform.id}
+          source={require('../assets/textures/ground.png')}
           style={[
-            styles.platform,
-            platform.type === 'ground' ? styles.ground : styles.floatingPlatform,
+            platform.type === 'ground' ? styles.platformImage : styles.floatingPlatformImage,
             {
               left: renderWithCameraOffset(platform.x),
               top: platform.y,
@@ -542,6 +529,7 @@ export default function GameScreen({ navigation }) {
               height: platform.height,
             }
           ]}
+          resizeMode="repeat" // ← ← ← КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: НЕ stretch, а repeat!
         />
       ))}
       
@@ -590,14 +578,6 @@ export default function GameScreen({ navigation }) {
         ]} 
       />
       
-      {/* HUD */}
-      <View style={styles.hud}>
-        <Text style={styles.hudText}>Счет: {score}</Text>
-        <Text style={styles.hudText}>Монеты: {coins}</Text>
-        <Text style={styles.hudText}>Время: {formatTime(gameTime)}</Text>
-        <Text style={styles.hudText}>Рекорд: {gameSettings.bestScore}</Text>
-      </View>
-      
       {/* ПАУЗА */}
       {gameState === 'paused' && (
         <View style={styles.pauseOverlay}>
@@ -629,36 +609,48 @@ export default function GameScreen({ navigation }) {
         </View>
       )}
       
-      {/* УПРАВЛЕНИЕ */}
-      <View style={styles.controls}>
-        <View style={styles.movementControls}>
-          <TouchableOpacity 
-            style={styles.controlButton} 
-            onPressIn={moveLeft}
-            onPressOut={stopMoving}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.controlButtonText}>←</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.controlButton} 
-            onPress={jump}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.controlButtonText}>↑</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.controlButton} 
-            onPressIn={moveRight}
-            onPressOut={stopMoving}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.controlButtonText}>→</Text>
-          </TouchableOpacity>
-        </View>
+      {/* УПРАВЛЕНИЕ — ДВЕ КНОПКИ ПРЫЖКА НАД ЛЕВОЙ И ПРАВОЙ КНОПКАМИ */}
+      <View style={styles.controlContainer}>
+        {/* КНОПКА ПРЫЖКА ЛЕВАЯ — над левой кнопкой движения */}
+        <TouchableOpacity 
+          style={styles.jumpLeftButton}
+          onPress={jumpLeft}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.controlButtonText}>↑</Text>
+        </TouchableOpacity>
+
+        {/* КНОПКА ПРЫЖКА ПРАВАЯ — над правой кнопкой движения */}
+        <TouchableOpacity 
+          style={styles.jumpRightButton}
+          onPress={jumpRight}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.controlButtonText}>↑</Text>
+        </TouchableOpacity>
+
+        {/* КНОПКА ВЛЕВО — левый нижний угол */}
+        <TouchableOpacity 
+          style={styles.leftButton}
+          onPressIn={moveLeft}
+          onPressOut={stopMoving}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.controlButtonText}>←</Text>
+        </TouchableOpacity>
+
+        {/* КНОПКА ВПРАВО — правый нижний угол */}
+        <TouchableOpacity 
+          style={styles.rightButton}
+          onPressIn={moveRight}
+          onPressOut={stopMoving}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.controlButtonText}>→</Text>
+        </TouchableOpacity>
       </View>
       
-      {/* КНОПКИ УПРАВЛЕНИЯ ИГРОЙ */}
+      {/* КНОПКИ УПРАВЛЕНИЯ ИГРОЙ (в правом верхнем углу) */}
       <View style={styles.gameControls}>
         <TouchableOpacity 
           style={styles.gameControlButton}
@@ -693,8 +685,49 @@ const styles = StyleSheet.create({
   },
   background: { 
     position: 'absolute',
+    width: '100%',
     height: '100%',
-    resizeMode: 'cover' 
+    resizeMode: 'repeat'
+  },
+  gameLogo: {
+    position: 'absolute',
+    top: 10,
+    left: 20,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#8B4513', // ← ← ← КОРИЧНЕВЫЙ (сепия)
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 3,
+    fontFamily: 'monospace',
+    zIndex: 200,
+  },
+  hud: {
+    position: 'absolute',
+    top: 10,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent', // ← ← ← ПРОЗРАЧНО!
+    borderWidth: 1,
+    borderColor: '#8B4513', // ← ← ← Тонкая коричневая рамка
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 12,
+    zIndex: 200,
+    flexWrap: 'nowrap',
+  },
+  hudText: {
+    color: '#8B4513', // ← ← ← ВСЁ — КОРИЧНЕВЫЙ!
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+    marginHorizontal: 5,
   },
   player: { 
     width: 40, 
@@ -703,21 +736,29 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     zIndex: 100,
   },
-  platform: {
+  platformImage: {
     position: 'absolute',
-    borderRadius: 8,
+    borderRadius: 0,
     zIndex: 10,
+    borderWidth: 2,
+    borderColor: '#8B4513',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
   },
-  ground: {
-    backgroundColor: '#8B4513',
-  },
-  floatingPlatform: {
-    backgroundColor: '#A0522D',
+  floatingPlatformImage: {
+    position: 'absolute',
+    borderRadius: 0,
+    zIndex: 10,
+    borderWidth: 2,
+    borderColor: '#8B4513',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 6,
   },
   coin: {
     width: 30,
@@ -731,44 +772,77 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     zIndex: 50,
   },
-  hud: {
+  controlContainer: {
     position: 'absolute',
-    top: 20,
-    left: 20,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    padding: 15,
-    borderRadius: 10,
-    minWidth: 150,
-    zIndex: 200,
-  },
-  hudText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  controls: { 
-    position: 'absolute', 
-    bottom: 30, 
+    bottom: 40,
     left: 0,
     right: 0,
     alignItems: 'center',
-    zIndex: 200,
-  },
-  movementControls: { 
-    flexDirection: 'row', 
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 30,
-    padding: 15,
+    zIndex: 200,
+    flexDirection: 'column',
+    gap: 10,
   },
-  controlButton: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
+  jumpLeftButton: {
+    position: 'absolute',
+    left: 55,
+    bottom: 90,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     padding: 20,
-    marginHorizontal: 15,
     borderRadius: 50,
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  jumpRightButton: {
+    position: 'absolute',
+    right: 55,
+    bottom: 90,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: 20,
+    borderRadius: 50,
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  leftButton: {
+    position: 'absolute',
+    left: 30,
+    bottom: 0,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: 25,
+    borderRadius: 50,
+    width: 80,
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  rightButton: {
+    position: 'absolute',
+    right: 30,
+    bottom: 0,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: 25,
+    borderRadius: 50,
+    width: 80,
+    height: 80,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -778,9 +852,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   controlButtonText: {
-    color: 'white',
+    color: '#8B4513', // ← ← ← КОРИЧНЕВЫЙ!
     fontSize: 24,
     fontWeight: 'bold',
+    fontFamily: 'monospace',
   },
   gameControls: {
     position: 'absolute',
@@ -807,6 +882,7 @@ const styles = StyleSheet.create({
   gameControlButtonText: {
     color: 'white',
     fontSize: 18,
+    fontFamily: 'monospace',
   },
   pauseOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -825,33 +901,51 @@ const styles = StyleSheet.create({
   pauseTitle: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#8B4513', // ← ← ← КОРИЧНЕВЫЙ!
     marginBottom: 40,
+    fontFamily: 'monospace',
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
   },
   gameOverTitle: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#E74C3C',
+    color: '#8B4513', // ← ← ← КОРИЧНЕВЫЙ!
     marginBottom: 20,
+    fontFamily: 'monospace',
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
   },
   gameOverScore: {
     fontSize: 24,
-    color: 'white',
+    color: '#8B4513',
     marginBottom: 10,
+    fontFamily: 'monospace',
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   gameOverCoins: {
     fontSize: 20,
-    color: 'white',
+    color: '#8B4513',
     marginBottom: 40,
+    fontFamily: 'monospace',
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   menuButton: {
-    backgroundColor: '#3498DB',
+    backgroundColor: 'rgba(139, 69, 19, 0.7)', // ← ← ← ТЕМНО-КОРИЧНЕВЫЙ
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
     marginVertical: 10,
     minWidth: 200,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#8B4513',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -859,8 +953,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   menuButtonText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: 'monospace',
   },
 });

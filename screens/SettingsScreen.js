@@ -1,49 +1,25 @@
 /**
  * ЭКРАН НАСТРОЕК
- * 
- * Задачи реализованы:
- * ✅ Управление ресурсами приложения (настройки)
- * ✅ Использование хуков для управления состоянием
- * ✅ Применение дизайна и стилей
  */
-
 import React, { useState, useContext } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  Switch, 
-  TouchableOpacity, 
-  ScrollView,
-  Alert 
-} from 'react-native';
+import { StyleSheet, Text, View, Image,Switch, TouchableOpacity, ScrollView,Alert } from 'react-native';
 import AppContext from '../AppContext';
 
 export default function SettingsScreen() {
   const { gameSettings, saveSettings } = useContext(AppContext);
   
-  // Локальное состояние для настроек
   const [localSettings, setLocalSettings] = useState(gameSettings);
 
-  /**
-   * ОБНОВЛЕНИЕ НАСТРОЙКИ
-   */
   const updateSetting = (key, value) => {
     const newSettings = { ...localSettings, [key]: value };
     setLocalSettings(newSettings);
   };
 
-  /**
-   * СОХРАНЕНИЕ НАСТРОЕК
-   */
   const handleSaveSettings = () => {
     saveSettings(localSettings);
     Alert.alert('Успех', 'Настройки сохранены!');
   };
 
-  /**
-   * СБРОС НАСТРОЕК
-   */
   const handleResetSettings = () => {
     Alert.alert(
       'Сброс настроек',
@@ -59,8 +35,8 @@ export default function SettingsScreen() {
               musicEnabled: true,
               vibrationEnabled: true,
               difficulty: 'medium',
-              bestScore: gameSettings.bestScore, // Сохраняем рекорд
-              totalCoins: gameSettings.totalCoins // Сохраняем монеты
+              bestScore: gameSettings.bestScore,
+              totalCoins: gameSettings.totalCoins
             };
             setLocalSettings(defaultSettings);
             saveSettings(defaultSettings);
@@ -70,9 +46,6 @@ export default function SettingsScreen() {
     );
   };
 
-  /**
-   * СБРОС ПРОГРЕССА
-   */
   const handleResetProgress = () => {
     Alert.alert(
       'Сброс прогресса',
@@ -98,9 +71,13 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Image 
+        source={require('../assets/textures/ground.png')} 
+        style={styles.background}
+        resizeMode="repeat"
+      />
       <Text style={styles.title}>Настройки игры</Text>
       
-      {/* НАСТРОЙКИ ЗВУКА */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>🔊 Звук</Text>
         
@@ -134,7 +111,7 @@ export default function SettingsScreen() {
           />
         </View>
       </View>
-      {/* ТЕСТИРОВАНИЕ СОВМЕСТИМОСТИ */}
+      
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>🧪 Тестирование</Text>
         
@@ -179,7 +156,6 @@ export default function SettingsScreen() {
         </TouchableOpacity>
       </View>
       
-      {/* НАСТРОЙКИ ГЕЙМПЛЕЯ */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>🎮 Геймплей</Text>
         
@@ -211,7 +187,6 @@ export default function SettingsScreen() {
         </View>
       </View>
       
-      {/* УПРАВЛЕНИЕ ДАННЫМИ */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>📊 Данные</Text>
         
@@ -228,7 +203,6 @@ export default function SettingsScreen() {
         </View>
       </View>
       
-      {/* КНОПКИ ДЕЙСТВИЙ */}
       <View style={styles.actions}>
         <TouchableOpacity 
           style={styles.saveButton}
@@ -245,7 +219,6 @@ export default function SettingsScreen() {
         </TouchableOpacity>
       </View>
       
-      {/* ИНФОРМАЦИЯ О ПРИЛОЖЕНИИ */}
       <View style={styles.infoSection}>
         <Text style={styles.infoTitle}>О приложении</Text>
         <Text style={styles.infoText}>Simple Runner v2.0.0</Text>
@@ -258,42 +231,45 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ECF0F1',
-    padding: 20,
-    // Для ландшафтного режима можно добавить
-    flexDirection: 'row', // или изменить расположение элементов
-  },
-  container: {
     flexGrow: 1,
-    backgroundColor: '#ECF0F1',
+    backgroundColor: 'transparent',
     padding: 20,
+    zIndex: 1,
+  },
+  background: {
+    ...StyleSheet.absoluteFillObject,
+    resizeMode: 'repeat',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 30,
+    textShadowColor: 'black',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+    fontFamily: 'monospace',
   },
   section: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 8,
     marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#4A90E2',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 4,
     elevation: 2,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF',
     marginBottom: 15,
+    fontFamily: 'monospace',
   },
   settingRow: {
     flexDirection: 'row',
@@ -301,66 +277,79 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#ECF0F1',
+    borderBottomColor: 'rgba(255,255,255,0.2)',
   },
   settingText: {
     fontSize: 16,
-    color: '#34495E',
+    color: '#CCCCCC',
     flex: 1,
+    fontFamily: 'monospace',
   },
   difficultyContainer: {
     flexDirection: 'row',
-    backgroundColor: '#ECF0F1',
-    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 6,
     padding: 4,
   },
   difficultyButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
   },
   difficultyButtonActive: {
-    backgroundColor: '#3498DB',
+    backgroundColor: 'rgba(52, 152, 219, 0.7)',
+    borderColor: '#4A90E2',
   },
   difficultyText: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: '#CCCCCC',
     fontWeight: '500',
+    fontFamily: 'monospace',
   },
   difficultyTextActive: {
     color: 'white',
   },
   dataButton: {
-    backgroundColor: '#E74C3C',
+    backgroundColor: 'rgba(231, 76, 60, 0.7)',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#4A90E2',
   },
   dataButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'monospace',
   },
   dataInfo: {
-    backgroundColor: '#F8F9F9',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     padding: 15,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   dataInfoText: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: '#CCCCCC',
     marginBottom: 5,
+    fontFamily: 'monospace',
   },
   actions: {
     marginBottom: 30,
   },
   saveButton: {
-    backgroundColor: '#27AE60',
+    backgroundColor: 'rgba(39, 174, 96, 0.7)',
     padding: 18,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
     marginBottom: 15,
+    borderWidth: 2,
+    borderColor: '#4A90E2',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -371,12 +360,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: 'monospace',
   },
   resetButton: {
-    backgroundColor: '#E74C3C',
+    backgroundColor: 'rgba(231, 76, 60, 0.7)',
     padding: 18,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#4A90E2',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -387,12 +379,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: 'monospace',
   },
   infoSection: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#4A90E2',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -402,13 +397,15 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#FFFFFF',
     marginBottom: 10,
+    fontFamily: 'monospace',
   },
   infoText: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: '#CCCCCC',
     marginBottom: 5,
     textAlign: 'center',
+    fontFamily: 'monospace',
   },
 });
